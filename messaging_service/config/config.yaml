@@ -53,6 +53,7 @@ plugins:
     - analytics
     - location_demo
     - dashboard
+    - ollama_assistant
   questionnaire:
     flow_path: config/flows/onboarding.yaml
   # Optional: multiple questionnaires can be added under 'questionnaires'
@@ -61,6 +62,15 @@ plugins:
   #     flow_path: config/flows/onboarding.yaml
 start_router:
   default_flow: onboarding
+
+# Local LLM via Ollama
+ollama:
+  host: ${OLLAMA_HOST}
+  model: ${OLLAMA_MODEL}
+  questionary_path: ${QUESTIONARY_PATH}
+  rag:
+    enabled: ${OLLAMA_RAG_ENABLED}
+    embed_model: ${OLLAMA_RAG_EMBED_MODEL}
 
 # Ticker demo configuration (optional)
 ticker:

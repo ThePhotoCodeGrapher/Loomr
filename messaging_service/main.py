@@ -26,6 +26,7 @@ from plugins.menu import MenuPlugin
 from plugins.location_demo import LocationDemo
 from plugins.dashboard import DashboardPlugin
 from plugins.analytics import AnalyticsPlugin
+from plugins.ollama_assistant import OllamaAssistant
 from core import analytics
 
 # Configure logging
@@ -104,6 +105,7 @@ class MessagingApp:
             'file_router': FileRouter,
             'ticker': TickerPlugin,
             'analytics': AnalyticsPlugin,
+            'ollama_assistant': OllamaAssistant,
         }
 
         # Load questionnaire flows (single or multiple)
@@ -189,6 +191,10 @@ class MessagingApp:
             elif plugin_name == 'analytics':
                 self.plugins.append(AnalyticsPlugin(self.config))
                 logger.info("Initialized plugin: analytics")
+            elif plugin_name == 'ollama_assistant':
+                oa_cfg = self.config.get('ollama', {})
+                self.plugins.append(OllamaAssistant(oa_cfg))
+                logger.info("Initialized plugin: ollama_assistant")
             elif plugin_name == 'location_demo':
                 loc_cfg = self.config.get('location_demo', {})
                 self.plugins.append(LocationDemo(loc_cfg))
