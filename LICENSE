@@ -1,0 +1,26 @@
+Prosperity Public License 3.0.0
+
+Parameters
+Licensor: The Loomr authors and contributors
+Software: Loomr (this repository)
+Use Limitation: You may use the Software for Noncommercial Use only
+
+Noncommercial Use means use by you or within your organization, in any medium, in a manner that is not intended for or directed toward commercial advantage or monetary compensation.
+
+License Grant
+Subject to the Use Limitation and the conditions below, the Licensor grants you a non-exclusive, worldwide, non-sublicensable, non-transferable license to copy, modify, create derivative works, and redistribute the Software in source or object form.
+
+Conditions
+1. Notices. You must retain the copyright notice of the Licensor and this License in all copies or substantial portions of the Software.
+2. No trademark license. This License does not grant you rights to use the Licensor’s names, logos, or trademarks.
+3. No liability. The Software is provided “AS IS”, without warranty of any kind, express or implied. In no event shall the Licensor be liable for any claim, damages or other liability, whether in an action of contract, tort or otherwise, arising from, out of or in connection with the Software or the use or other dealings in the Software.
+4. Patents. No patent license is granted under this License.
+5. Termination. If you violate the terms of this License, your rights under this License will terminate automatically.
+
+Commercial License
+Commercial use of the Software requires a separate, paid license from the Licensor. See COMMERCIAL_LICENSE.md for details.
+
+Additional Permissions
+The Licensor may grant additional permissions in writing. If granted, those permissions apply only to you and do not modify this License for others.
+
+SPDX-License-Identifier: Prosperity-3.0.0

@@ -1,0 +1,400 @@
+# Messaging Service Configuration
+
+# Telegram configuration
+telegram:
+  token: ${TELEGRAM_BOT_TOKEN}  # Will be loaded from environment variable
+  # Optional: default reply keyboard behavior
+  keyboard:
+    resize: true
+    one_time: true
+  # Optional: set bot command menu
+  menu:
+    commands:
+      - command: start
+        description: Start or restart onboarding
+      - command: help
+        description: Show help
+      - command: admin
+        description: Admin help
+      - command: test
+        description: Admin test checklist
+      - command: nearby
+        description: Find people near you
+      - command: friend_find
+        description: Distance to a friend
+      - command: radar
+        description: Show closest people
+      - command: dashboard
+        description: Open WebApp dashboard
+  # Payments via Telegram providers (e.g., Wallet Pay for TON/Stars)
+  payments:
+    # mode: wallet | stars (informational)
+    mode: wallet
+    # Provider token from @Wallet (Telegram Wallet Pay). Put in .env as TELEGRAM_PROVIDER_TOKEN_WALLET
+    provider_token: ${TELEGRAM_PROVIDER_TOKEN_WALLET}
+  
+# Plugin configuration
+plugins:
+  enabled:
+    - group_activation
+    - echo
+    - questionnaire
+    - start_router
+    - admin_tools
+    - invites
+    - job_board
+    - product_catalog
+    - crypto_watcher
+    - ton_watcher
+    - support
+    - menu
+    - file_router
+    - ticker
+    - analytics
+    - location_demo
+    - dashboard
+  questionnaire:
+    flow_path: config/flows/onboarding.yaml
+  # Optional: multiple questionnaires can be added under 'questionnaires'
+  # questionnaires:
+  #   onboarding:
+  #     flow_path: config/flows/onboarding.yaml
+start_router:
+  default_flow: onboarding
+
+# Ticker demo configuration (optional)
+ticker:
+  interval: 1.0   # seconds between frames
+  id: demo-1      # ticker id used to build MQTT topic
+  mqtt:
+    host: localhost
+    port: 1883
+    # topic supports {id} placeholder
+    topic: "ticker/{id}"
+    # username: your-user
+    # password: your-pass
+
+# Location demo configuration
+location_demo:
+  default_radius_m: 200
+  max_age_s: 43200    # 12h
+  max_results: 10
+
+# Admin tools configuration
+admin_tools:
+  admins: ["123456789"]  # Telegram user IDs allowed to use admin commands
+  user_store_path: config/users.json
+  # Optional: enable self-registration for admins with a shared secret
+  register_secret: ${ADMIN_REGISTER_SECRET}
+
+# Access gate and invites configuration
+invites:
+  access:
+    locked: false
+    allowed_when_locked:
+      - /start
+      - /help
+      - /join
+  enabled: true
+  store_path: config/invites.json
+  default_role: member
+  code_length: 8
+  expire_days_default: 7
+  max_uses_default: 1
+  bind_to_user_by_default: true
+  daily_create_limit: 5
+  # Optional: app deep link template used for inline "Open in App" button
+  # Examples: "myapp://join?code={code}&user={user_id}" or "https://your.app/invite?code={code}&user={user_id}"
+  app_link_template: ""
+  # QR code generation for deep links returned to admins when creating bound invites
+  qr:
+    enabled: true
+    box_size: 6     # controls pixel size of QR modules
+    border: 2       # white border around QR
+  on_redeem:
+    flow: onboarding
+    welcome_template: |
+      Welcome, {first_name}! You joined with code {code}.
+      Role: {role}
+
+# Job board configuration
+job_board:
+  # roles that receive job broadcasts
+  roles: ["influencer"]
+  # allow non-admins with these roles to post jobs (optional)
+  posters_roles: []
+  # default verification type for new jobs: manual | ig_post (future)
+  verification: manual
+  # default credits payout
+  credits: 50
+  # SQLite database path (relative to messaging_service/)
+  db_path: data/jobs.db
+  # Broadcast message template
+  broadcast_template: |
+    New job: {title}
+    {desc}
+    Reward: {credits} credits
+    Job ID: {job_id}
+    Claim with /claim {job_id}
+  
+# Logging configuration
+logging:
+  level: INFO
+  format: "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+
+# Products (ProductCatalog) configuration
+products:
+  source: file
+  file_path: config/products.json
+  page_size: 5
+  # Optional buy link template (fallback to per-product url)
+  # buy_link_template: "https://shop.example/checkout?id={id}"
+  # Payments configuration for ProductCatalog Buy action
+  payments:
+    mode: external_url       # telegram_invoice | external_url
+    currency: USD            # Use a fiat currency (USD/EUR/etc.) when using card providers
+    # Amounts are integers in the minor unit (cents for USD/EUR)
+    price_map:
+      p1: 499   # $4.99
+      p2: 1299  # $12.99
+  # Delivery verification on deep link /start deliver-<token>
+  delivery:
+    mode: http               # http | cli | disabled
+    http:
+      url: http://localhost:8090/deliver
+      method: POST
+      headers:
+        Content-Type: application/json
+        Authorization: Bearer ${DELIVER_BEARER}
+      # Available vars: {action, token, user_id, chat_id, product_id}
+      body_template: |
+        {"action":"{action}","token":"{token}","user_id":"{user_id}","chat_id":"{chat_id}","product_id":"{product_id}"}
+  # Map product_id -> role to grant upon delivery/verification
+  roles:
+    p1: basic
+    p2: pro
+  # Optional subscription days per product (adds/extends expiry for the granted role)
+  subscription_days:
+    p2: 30
+
+# Crypto payment watcher (USDT)
+crypto:
+  usdt:
+    default_chain: eth   # eth | bsc | polygon | tron
+    # Price per product_id (USDT units)
+    price_map:
+      p1: 10
+      p2: 20
+    eth:
+      recipient: ${TUSDT_WATCH_ADDRESS}
+      confirmations: 1
+      contract: "0xdAC17F958D2ee523a2206206994597C13D831ec7"  # USDT ERC20
+      api_key: ${ETHERSCAN_API_KEY}
+    bsc:
+      recipient: "0xYourBSCRecipient"
+      confirmations: 1
+      contract: "0x55d398326f99059fF775485246999027B3197955"  # USDT BEP20
+      api_key: ${BSCSCAN_API_KEY}
+    polygon:
+      recipient: ${POLY_USD_ADDRESS}
+      confirmations: 1
+      contract: "0xC2132D05D31c914a87C6611C10748AEb04B58e8F"  # USDT Polygon
+      api_key: ${POLYGONSCAN_API_KEY}
+    tron:
+      recipient: "TYourTRONRecipientBase58"  # base58 address
+      confirmations: 1
+  ton:
+    # Price per product_id (TON units)
+    price_map:
+      p1: 0.001   # minimal test price (adjust as needed)
+      p2: 0.001
+    recipient: ${TON_WALLET}
+    confirmations: 1
+    api_base: https://testnet.tonapi.io
+    api_key: ${TONAPI_KEY}
+
+# Group activation and credits metering
+group_activation:
+  enabled: true
+  store_path: config/groups.json
+  # Minimal TON amount to activate or top-up when unspecified
+  min_activation_ton: 0.001
+  # Conversion rate: credits per 1 TON
+  ton_to_credits_rate: 10000000   # 0.001 TON => 10,000 credits (~10 MB inbound if 1 credit/KB)
+  # Costs in credits per KB (rounded up per message)
+  in_cost_per_kb_credits: 1.0
+  out_cost_per_kb_credits: 0.25
+  # Optional tiered rate profiles; override in/out per profile
+  default_profile: standard
+  rate_profiles:
+    standard:
+      in: 1.0
+      out: 0.25
+    pro:
+      in: 0.7
+      out: 0.15
+  # Optional plan pricing (TON per month) used by /ga_upgrade and ton_watcher
+  plans:
+    pro:
+      monthly_ton: 0.002
+  # Optional code-based activation
+  activation_codes: []            # e.g., ["ABC123", "VIP2025"]
+  activation_code_bundle_credits: 10000
+  # Cooldown for top-up reminder messages in groups
+  topup_message_cooldown_s: 3600
+
+# Declarative menus (handled by plugins/menu.py)
+menus:
+  - command: "/menu"
+    text: |
+      Menu:
+      - /products
+      - /tier
+      - /events
+  - command: "/events"
+    text: |
+      Available events:
+      - payment.usdt.confirmed
+      - payment.ton.confirmed
+      - delivery.sent
+      - role.assigned
+      - product.viewed
+      - product.list_viewed
+      - product.buy_clicked
+  - command: "/ton"
+    admins_only: true
+    text: |
+      TON Admin
+      Usage: /ton_check <tx_hash> <product_id>
+      Price map and recipient are configured in config.crypto.ton.
+  - command: "/test"
+    admins_only: true
+    text: |
+      Admin Test Checklist:
+      1) Media groups → send an album of 3–10 photos. Expect:
+         - Grouped event emitted
+         - Auto GIF reply (if only images) from file_router demo
+      2) Single file → send one photo/video/document/audio. Expect:
+         - Acknowledgment reply with file_id and link
+      3) Location → share a location. Expect:
+         - Digital footprint reply + Google Maps link
+      4) Contact → share a contact. Expect:
+         - Echo of contact name/phone
+      5) Invites → as admin run:
+         - /invite_create DEMO123 role=member max=3
+         - /invite_for @username role=member
+         Bot should return t.me link and QR (if enabled). Redeem via /start join-<code>.
+      6) Events → use /events and trigger any flow to see admin notifications.
+      7) Menu gating → this /test is admins_only; non-admins should not see output.
+
+# Event handlers (consumed by core/event_bus.py)
+events:
+  handlers:
+    - topic: payment.usdt.confirmed
+      action: send_message
+      params:
+        to: "${ADMIN_CHAT_ID}"
+        template: "Payment {amount} USDT for {product_id} by {user_id} on {chain} (tx {txid})"
+    - topic: role.assigned
+      action: http_request
+      filters:
+        role: "pro"
+      params:
+        method: POST
+        url: "https://example.com/webhooks/role"
+        headers:
+          Content-Type: "application/json"
+        body_template: '{"user_id":"{user_id}","role":"{role}","expires_at":{expires_at}}'
+    - topic: delivery.sent
+      action: shell
+      params:
+        command: "echo Delivered {product_id} to {user_id}"
+    - topic: product.viewed
+      action: send_message
+      params:
+        to: "${ADMIN_CHAT_ID}"
+        template: "Viewed {product_id} (page {page}, category {category}) by chat {chat_id}"
+    - topic: product.list_viewed
+      action: shell
+      params:
+        command: "echo List page {page}/{pages} cat {category} count {count}"
+    - topic: product.buy_clicked
+      action: send_message
+      params:
+        to: "${ADMIN_CHAT_ID}"
+        template: "Buy clicked for {product_id} (page {page}, category {category}) by chat {chat_id}"
+    - topic: payment.tg.confirmed
+      action: send_message
+      params:
+        to: "${ADMIN_CHAT_ID}"
+        template: "TG Payment {total_amount} {currency} payload={payload} user={user_id}"
+    - topic: payment.external.confirmed
+      action: send_message
+      params:
+        to: "${ADMIN_CHAT_ID}"
+        template: "External payment ok user={user_id} product={product_id} amount={amount} {currency}"
+    - topic: payment.ton.confirmed
+      action: send_message
+      params:
+        to: "${ADMIN_CHAT_ID}"
+        template: "TON payment {amount} TON for {product_id} by {user_id} (tx {txid})"
+
+    # Files/media routing notifications (optional)
+    - topic: message.file_received
+      action: send_message
+      params:
+        to: "${ADMIN_CHAT_ID}"
+        template: "File received type={type} file_id={file_id} from {user_id} in {chat_id}"
+    - topic: message.location_received
+      action: send_message
+      params:
+        to: "${ADMIN_CHAT_ID}"
+        template: "Location received lat={lat} lon={lon} from {user_id} in {chat_id}"
+    - topic: message.contact_received
+      action: send_message
+      params:
+        to: "${ADMIN_CHAT_ID}"
+        template: "Contact received text={text} from {user_id} in {chat_id}"
+
+# Webhook server for external payment callbacks
+webhook:
+  enabled: true
+  host: 0.0.0.0
+  port: 8081
+  path: /webhook/payment
+  secret: ${WEBHOOK_SECRET}
+
+# Web App configuration (used by Dashboard plugin)
+web_app:
+  # Change to your public HTTPS URL when using a tunnel (e.g., https://your-tunnel.example/webapp)
+  url: http://localhost:8081/webapp
+
+# Support module
+support:
+  group_id: ${SUPPORT_GROUP_ID}         # optional; if set bot posts new tickets to this group
+  store_path: config/support_tickets.json
+  notify_admins_dm: true                 # if no group, DM all admins
+
+# File router plugin configuration
+file_router:
+  # mode: emit_only | http
+  mode: emit_only
+  # Group albums/media groups into a single payload
+  grouping:
+    enabled: true
+    window_ms: 800    # wait time to collect all items in a media_group (snappier)
+    max_items: 10     # Telegram album cap
+  # Optional demo transforms for quick showcase
+  demo:
+    make_gif: true    # if an album contains only images, send back an animated GIF
+    gif_width: 512
+    frame_ms: 600
+  # Optional HTTP forward for non-text messages
+  # http:
+  #   url: ${FILE_FORWARD_URL}
+  #   method: POST
+  #   headers:
+  #     Content-Type: application/json
+  #     Authorization: Bearer ${FILE_FORWARD_TOKEN}
+  #   # The plugin sends the payload as JSON by default; body_template overrides, with {json} available
+  #   # body_template: "{json}"

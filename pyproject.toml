@@ -1,0 +1,60 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "Loomr"
+version = "0.1.0"
+description = "Modular, event-driven messaging bot runtime with plugins, YAML flows, and built-in FastAPI."
+readme = {file = "messaging_service/README.md", content-type = "text/markdown"}
+requires-python = ">=3.10"
+license = { text = "Prosperity Public License 3.0.0 (non-commercial)" }
+authors = [
+  { name = "Kai Gartner", email = "" }
+]
+keywords = ["telegram", "bot", "fastapi", "plugins", "event-bus", "yaml", "sdk"]
+classifiers = [
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
+  "License :: Other/Proprietary License",
+  "Intended Audience :: Developers",
+  "Topic :: Software Development :: Libraries :: Application Frameworks",
+]
+
+# Keep in sync with messaging_service/requirements.txt
+# (For local dev you can still use requirements.txt; this list is for packaging.)
+dependencies = [
+  "aiogram>=2.25.1",
+  "aiohttp>=3.9.1",
+  "PyYAML>=6.0.1",
+  "fastapi>=0.110.0",
+  "uvicorn>=0.29.0",
+  "aiosqlite>=0.19.0",
+  "pydantic>=2.6.4",
+  "typer[all]>=0.12.0",
+  "rich>=13.7.0",
+  "paho-mqtt>=1.6.1",
+  "cairosvg>=2.7.1",
+  "Pillow>=10.2.0",
+]
+
+[project.urls]
+Homepage = "https://github.com/ThePhotoCodeGrapher/Loomr"
+Documentation = "https://github.com/ThePhotoCodeGrapher/Loomr#readme"
+Issues = "https://github.com/ThePhotoCodeGrapher/Loomr/issues"
+Support = "https://t.me/+i1RDBKJv0U01OTQ0"
+
+[project.scripts]
+loomr = "messaging_service.cli:main"
+
+[tool.setuptools]
+package-dir = {"" = "."}
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["messaging_service*"]
+exclude = ["examples*", "docs*", "tests*"]
+
+[tool.setuptools.package-data]
+"messaging_service" = ["config/*", "config/flows/*"]

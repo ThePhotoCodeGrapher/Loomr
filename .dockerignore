@@ -1,0 +1,24 @@
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.so
+
+.git/
+.github/
+.vscode/
+.idea/
+.DS_Store
+
+.env
+**/.venv/
+*.log
+htmlcov/
+.pytest_cache/
+
+# Exclude local data/state (generated at runtime)
+messaging_service/config/analytics.db
+messaging_service/config/users.json
+messaging_service/config/groups.json
+messaging_service/config/support_tickets.json
+messaging_service/config/invites.json

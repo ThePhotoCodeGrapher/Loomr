@@ -1,0 +1,59 @@
+name: CI
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+
+jobs:
+  build-test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install deps (venv)
+        run: |
+          python -m venv .venv
+          . .venv/bin/activate
+          python -m pip install --upgrade pip
+          pip install -r messaging_service/requirements.txt
+
+      - name: Smoke test CLI init
+        run: |
+          . .venv/bin/activate
+          python -m messaging_service.cli init --minimal --no-examples || true
+
+      - name: Start API server
+        run: |
+          . .venv/bin/activate
+          nohup uvicorn messaging_service.api_server:app --host 127.0.0.1 --port 8090 &
+          echo $! > api.pid
+          sleep 3
+
+      - name: Healthcheck API
+        run: |
+          curl -f http://127.0.0.1:8090/docs > /dev/null
+
+      - name: Stop API
+        if: always()
+        run: |
+          kill $(cat api.pid) || true
+
+      - name: Package build (sdist/wheel)
+        run: |
+          . .venv/bin/activate
+          pip install build
+          python -m build
+
+      - name: Archive dist
+        uses: actions/upload-artifact@v4
+        with:
+          name: dist
+          path: dist/*

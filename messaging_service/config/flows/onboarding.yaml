@@ -1,0 +1,59 @@
+name: onboarding
+start: ask_name
+reveal:
+  enabled: true
+  type: typewriter
+  mode: new              # send full messages, no inline edits
+  cps: 10                   # faster (~600 CPM ≈ ~120 WPM)
+  chunk: 4                  # larger bursts
+  jitter_ms: 30             # less jitter
+  punctuation_ms: 60        # shorter punctuation pause
+  min_edit_interval_ms: 80  # faster edit throttle
+  head_chars: 20            # jump to full text earlier
+  typos_prob: 0.0           # disable typos for snappier feel
+  correction_delay_ms: 100
+  max_typos: 0
+keyboard:
+  enabled: true
+  columns: 2
+  remove_when_no_options: true
+steps:
+  ask_name:
+    prompt: "Hi! I'm Weavre, using Weave A.I. What's your name? (type /cancel to exit)"
+    var: name
+    validate: "len(text) >= 2"
+    error: "Please enter at least 2 characters."
+    next: ask_nickname
+    loader: true
+  ask_nickname:
+    prompt: "Nice to meet you, {name}! What should I call you? (use /back to go back)"
+    var: nickname
+    validate: "len(text) >= 2"
+    error: "Nickname too short."
+    next: ask_plan
+  ask_plan:
+    prompt: "Choose a plan:"
+    var: plan
+    options:
+      - text: "Free"
+        value: free
+        next: summary
+      - text: "Pro"
+        value: pro
+        next: pro_gate
+    # Fallback if user types text; conditional example
+    next_if:
+      - when: "plan == 'pro'"
+        next: pro_gate
+      - else: summary
+  pro_gate:
+    prompt: "Pro selected. To unlock Pro features, complete payment. (demo: type 'paid' to continue)"
+    var: pro_confirmation
+    validate: "text.lower() == 'paid'"
+    error: "Please type 'paid' to simulate payment in this demo."
+    next: summary
+  summary:
+    prompt: "All set, {name}! I'll call you {nickname}. Plan: {plan}" 
+    end: true
+triggers:
+  commands: ["/start", "/onboard", "/questionnaire"]

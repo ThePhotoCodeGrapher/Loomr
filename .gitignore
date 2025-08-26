@@ -1,0 +1,53 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.so
+*.egg-info/
+.build/
+.dist/
+
+# Virtual envs
+.env
+.venv/
+**/.venv/
+
+# IDE
+.vscode/
+.idea/
+.DS_Store
+
+# Logs
+*.log
+logs/
+
+# Local data and caches
+.cache/
+*.sqlite3
+*.db
+**/data/
+
+# Messaging service specific
+messaging_service/config/analytics.db
+messaging_service/config/users.json
+messaging_service/config/groups.json
+messaging_service/config/support_tickets.json
+messaging_service/config/invites.json
+messaging_service/config/products.json
+
+# Keep example config but ignore local overrides
+!messaging_service/.env.example
+messaging_service/.env
+
+# Bytecode and build
+build/
+dist/
+
+# Coverage/test
+.coverage
+htmlcov/
+.pytest_cache/
+
+# Node/web (if added later)
+node_modules/
