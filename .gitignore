@@ -57,3 +57,12 @@ htmlcov/
 
 # Node/web (if added later)
 node_modules/
+
+# AI/Model artifacts (safety)
+models/
+checkpoints/
+ollama/
+*.gguf
+*.bin
+*.pt
+*.safetensors

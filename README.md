@@ -35,6 +35,56 @@ Loomr is a modular, event-driven messaging runtime for building bots and automat
   messaging_service/.venv/bin/python -m messaging_service.cli run-bot
   ```
 
+## Local LLM via Ollama (optional)
+
+Run Loomr with a local model through [Ollama](https://ollama.com/). The built-in plugin `ollama_assistant` exposes two commands:
+
+- `/ask <question>` — ask the local model a question.
+- `/coach <user reply>` — evaluate if a user's reply answers the current question and get a clearer re-ask.
+
+### Setup
+
+1) Install and pull a model
+
+```bash
+curl -fsSL https://ollama.com/install.sh | sh
+ollama pull llama3:8b
+curl -sS http://127.0.0.1:11434/api/tags
+```
+
+2) Environment
+
+Copy `.env.example` to `.env` and set at least your Telegram token. Optional Ollama vars:
+
+```env
+OLLAMA_HOST=http://127.0.0.1:11434
+OLLAMA_MODEL=llama3:8b
+QUESTIONARY_PATH=messaging_service/config/questionary.md
+```
+
+3) Enable plugin
+
+`messaging_service/config/config.yaml` already includes `ollama_assistant` under `plugins.enabled` and an `ollama:` section.
+
+4) Run
+
+```bash
+make venv && make install
+make run-bot
+```
+
+### Usage examples
+
+DM or Group (with BotFather privacy ON, the bot only sees commands):
+
+```text
+/ask What plugins are enabled?
+/ask Summarize the last 5 messages.
+/coach Why should I choice ?
+```
+
+Group privacy OFF allows the bot to receive normal messages, but by default this plugin only responds to `/ask` and `/coach`.
+
 ## API overview
 
 FastAPI app in `messaging_service/api_server.py`.
