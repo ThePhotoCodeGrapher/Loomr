@@ -1,6 +1,6 @@
 {
   "name": "loomr-sdk",
-  "version": "0.1.3",
+  "version": "0.1.6",
   "description": "TypeScript SDK for Loomr API",
   "license": "SEE LICENSE IN ../../LICENSE",
   "repository": {
