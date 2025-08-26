@@ -38,30 +38,58 @@ class OllamaAssistant(MessageHandler):
 
     async def handle(self, message: Message, service: MessagingService) -> bool:
         text = (message.content or "").strip()
-        if not text.startswith("/ask"):
+        if not (text.startswith("/ask") or text.startswith("/coach")):
             return False
 
-        prompt = text[4:].strip()
-        if not prompt:
+        if text.startswith("/ask"):
+            prompt = text[4:].strip()
+            if not prompt:
+                await service.send_message(
+                    chat_id=message.chat.id,
+                    text="Usage: /ask <your question>",
+                    reply_to_message_id=message.message_id,
+                )
+                return True
+
+            await service.send_chat_action(chat_id=message.chat.id, action="typing")
+            try:
+                answer = await self._chat_ollama(self.system_text, prompt)
+            except Exception as e:
+                answer = f"Error talking to local model: {e}"
+
             await service.send_message(
                 chat_id=message.chat.id,
-                text="Usage: /ask <your question>",
+                text=answer.strip()[:4000],
                 reply_to_message_id=message.message_id,
             )
             return True
 
-        await service.send_chat_action(chat_id=message.chat.id, action="typing")
-        try:
-            answer = await self._chat_ollama(self.system_text, prompt)
-        except Exception as e:
-            answer = f"Error talking to local model: {e}"
+        # /coach: analyze a user's reply and suggest a clearer follow-up question
+        if text.startswith("/coach"):
+            user_reply = text[len("/coach"):].strip()
+            if not user_reply:
+                await service.send_message(
+                    chat_id=message.chat.id,
+                    text=(
+                        "Usage: /coach <user reply>\n"
+                        "I will check if the reply answers the current question and suggest a clearer re-ask."
+                    ),
+                    reply_to_message_id=message.message_id,
+                )
+                return True
 
-        await service.send_message(
-            chat_id=message.chat.id,
-            text=answer.strip()[:4000],
-            reply_to_message_id=message.message_id,
-        )
-        return True
+            await service.send_chat_action(chat_id=message.chat.id, action="typing")
+            try:
+                coach_text = await self._coach_suggest(self.system_text, user_reply)
+            except Exception as e:
+                coach_text = f"Coach error: {e}"
+
+            await service.send_message(
+                chat_id=message.chat.id,
+                text=coach_text.strip()[:4000],
+                reply_to_message_id=message.message_id,
+            )
+            return True
 
     async def _chat_ollama(self, system_text: str, user_text: str) -> str:
         url = f"{self.host.rstrip('/')}/api/chat"
@@ -85,3 +113,19 @@ class OllamaAssistant(MessageHandler):
                     # Fallback if response schema differs
                     content = data.get("response") or ""
                 return content or "(empty response)"
+
+    async def _coach_suggest(self, system_text: str, user_reply: str) -> str:
+        """
+        Ask the model to judge if a reply answers a pending question and suggest a clearer re-ask.
+        No persistent memory yet; relies on system prompt as guardrails.
+        """
+        system = (
+            system_text
+            + "\n\nYou are a QA coach. Evaluate if the user's reply answers the current question.\n"
+              "If not, propose ONE concise, friendly re-ask to elicit the needed info.\n"
+              "Respond in this format:\n"
+              "- Verdict: valid|invalid\n- Reason: <short>\n- Re-ask: <one sentence question>\n"
+              "Use simple language."
+        )
+        prompt = f"User reply: {user_reply}\nJudge and suggest."
+        return await self._chat_ollama(system, prompt)
