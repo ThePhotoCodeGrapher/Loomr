@@ -10,7 +10,7 @@ readme = {file = "README.md", content-type = "text/markdown"}
 requires-python = ">=3.10"
 license = { text = "Prosperity Public License 3.0.0 (non-commercial)" }
 authors = [
-  { name = "Kai Gartner", email = "" }
+  { name = "Kai Gartner", email = "hello@example.com" }
 ]
 keywords = ["telegram", "bot", "fastapi", "plugins", "event-bus", "yaml", "sdk"]
 classifiers = [
