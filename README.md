@@ -1,4 +1,6 @@
 # Loomr — Modular Messaging Service
+[![PyPI version](https://img.shields.io/pypi/v/Loomr.svg)](https://pypi.org/project/Loomr/)
+[![npm version](https://img.shields.io/npm/v/loomr-sdk.svg)](https://www.npmjs.com/package/loomr-sdk)
 Loomr is a modular, event-driven messaging runtime for building bots and automations across channels. Start with Telegram today; add more platforms via adapters and plugins. Configure flows in YAML, integrate via HTTP or SDKs, and run anywhere (Docker, CLI, or code).
 
 ## Why Loomr
@@ -95,6 +97,27 @@ FastAPI app in `messaging_service/api_server.py`.
 - Group upgrade (example): `POST /group/upgrade`
 
 Auth: set `DELIVER_BEARER` in `.env` and include `Authorization: Bearer <token>` for `/deliver`.
+
+## TypeScript SDK (npm)
+
+A minimal SDK is provided in `clients/ts-sdk` and published as `loomr-sdk`.
+
+Install:
+
+```bash
+npm i loomr-sdk
+```
+
+Usage:
+
+```ts
+import { LoomrClient } from 'loomr-sdk';
+
+const client = new LoomrClient({ baseUrl: 'http://127.0.0.1:8090', token: 'Bearer ...' });
+const health = await client.health();
+```
+
+CI publishes on tags named `sdk-v*` (see `.github/workflows/npm-publish.yml`).
 
 ## Roadmap
 

@@ -11,6 +11,17 @@
     "url": "https://github.com/ThePhotoCodeGrapher/Loomr/issues"
   },
   "homepage": "https://github.com/ThePhotoCodeGrapher/Loomr#readme",
+  "keywords": [
+    "loomr",
+    "sdk",
+    "typescript",
+    "javascript",
+    "bot",
+    "messaging",
+    "telegram",
+    "fastapi",
+    "api-client"
+  ],
   "type": "module",
   "main": "dist/index.cjs",
   "module": "dist/index.js",
