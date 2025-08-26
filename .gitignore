@@ -10,6 +10,10 @@ __pycache__/
 
 # Virtual envs
 .env
+.env.local
+.env.development
+.env.production
+.env.*.local
 .venv/
 **/.venv/
 
@@ -26,6 +30,7 @@ logs/
 .cache/
 *.sqlite3
 *.db
+*.sqlite
 **/data/
 
 # Messaging service specific
@@ -39,6 +44,7 @@ messaging_service/config/products.json
 # Keep example config but ignore local overrides
 !messaging_service/.env.example
 messaging_service/.env
+messaging_service/config/questionary.local.md
 
 # Bytecode and build
 build/
