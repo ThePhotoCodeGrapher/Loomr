@@ -1,0 +1,29 @@
+{
+  "name": "@loomr/sdk",
+  "version": "0.1.0",
+  "description": "TypeScript SDK for Loomr API",
+  "license": "SEE LICENSE IN ../../LICENSE",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ThePhotoCodeGrapher/Loomr.git"
+  },
+  "bugs": {
+    "url": "https://github.com/ThePhotoCodeGrapher/Loomr/issues"
+  },
+  "homepage": "https://github.com/ThePhotoCodeGrapher/Loomr#readme",
+  "type": "module",
+  "main": "dist/index.cjs",
+  "module": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.json && node scripts/postbuild.cjs",
+    "prepublishOnly": "npm run build"
+  },
+  "devDependencies": {
+    "@types/node": "^20.11.30",
+    "typescript": "^5.4.0"
+  }
+}
